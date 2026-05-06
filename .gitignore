@@ -1,0 +1,30 @@
+.git-nested-backup/
+
+# Dependencies and generated outputs
+**/node_modules/
+**/dist/
+**/build/
+**/.angular/cache/
+**/.dart_tool/
+**/.downloadIntermediates/
+**/.temp/
+
+# Local environment files
+**/.env
+**/.env.*
+!**/.env.example
+
+# Android SDK / emulator payloads accidentally placed in the app tree
+mobile-v3/emulator/
+mobile-v3/build-tools/
+mobile-v3/platform-tools/
+mobile-v3/platforms/
+mobile-v3/sources/
+mobile-v3/system-images/
+mobile-v3/skins/
+mobile-v3/licenses/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.log

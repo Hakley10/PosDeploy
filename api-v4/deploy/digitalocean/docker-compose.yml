@@ -1,0 +1,57 @@
+services:
+  pos_api:
+    image: registry.digitalocean.com/${DO_REGISTRY_NAME}/pos-api:${API_IMAGE_TAG:-latest}
+    container_name: pos_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      FILE_BASE_URL: ${FILE_BASE_URL:-http://pos_file:8080}
+      JS_BASE_URL: ${JS_BASE_URL:-http://pos_report:5488}
+    ports:
+      - "${API_PUBLIC_PORT:-8990}:3000"
+    depends_on:
+      - pos_file
+      - pos_report
+    networks:
+      - pos
+
+  pos_file:
+    image: registry.digitalocean.com/${DO_REGISTRY_NAME}/pos-file:${FILE_IMAGE_TAG:-latest}
+    container_name: pos_file
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 8080
+    ports:
+      - "${FILE_PUBLIC_PORT:-8080}:8080"
+    volumes:
+      - pos_file_uploads:/app/public/uploads
+    networks:
+      - pos
+
+  pos_report:
+    image: ${JSREPORT_IMAGE:-jsreport/jsreport:latest}
+    container_name: pos_report
+    restart: unless-stopped
+    environment:
+      extensions_authentication_admin_username: ${JS_USERNAME:-admin}
+      extensions_authentication_admin_password: ${JS_PASSWORD}
+      extensions_authentication_cookieSession_secret: ${JS_SESSION_SECRET}
+      chrome_launchOptions_args: --no-sandbox
+    ports:
+      - "${REPORT_PUBLIC_PORT:-5488}:5488"
+    volumes:
+      - pos_report_data:/app/data
+    networks:
+      - pos
+
+networks:
+  pos:
+    name: pos
+
+volumes:
+  pos_file_uploads:
+  pos_report_data:

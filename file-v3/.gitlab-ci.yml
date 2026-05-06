@@ -1,0 +1,38 @@
+stages:
+  - build
+  - deploy
+
+build:production:docr:
+  image: docker:27
+  stage: build
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - echo "$DO_ACCESS_TOKEN" | docker login registry.digitalocean.com -u "$DO_ACCESS_TOKEN" --password-stdin
+  script:
+    - docker build -f Dockerfile.prod -t registry.digitalocean.com/$DO_REGISTRY_NAME/pos-file:$CI_COMMIT_SHORT_SHA -t registry.digitalocean.com/$DO_REGISTRY_NAME/pos-file:latest .
+    - docker push registry.digitalocean.com/$DO_REGISTRY_NAME/pos-file:$CI_COMMIT_SHORT_SHA
+    - docker push registry.digitalocean.com/$DO_REGISTRY_NAME/pos-file:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
+
+deploy:production:digitalocean:
+  image: alpine:3.20
+  stage: deploy
+  needs:
+    - build:production:docr
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$DO_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H "$DO_HOST" >> ~/.ssh/known_hosts
+  script:
+    - ssh "$DO_SSH_USER@$DO_HOST" "mkdir -p /opt/pos"
+    - scp deploy/digitalocean/docker-compose.yml deploy/digitalocean/deploy.sh "$DO_SSH_USER@$DO_HOST:/opt/pos/"
+    - ssh "$DO_SSH_USER@$DO_HOST" "echo '$DO_ACCESS_TOKEN' | docker login registry.digitalocean.com -u '$DO_ACCESS_TOKEN' --password-stdin && chmod +x /opt/pos/deploy.sh && cd /opt/pos && DO_REGISTRY_NAME='$DO_REGISTRY_NAME' FILE_IMAGE_TAG='$CI_COMMIT_SHORT_SHA' ./deploy.sh"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
