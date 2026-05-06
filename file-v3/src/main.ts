@@ -29,6 +29,10 @@ app.get('/', (_req, res) => {
     res.render('index');
 });
 
+app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', service: 'pos_file' });
+});
+
 /**==================================================================
  * @noted Use all routes with prefix service
  */

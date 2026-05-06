@@ -17,7 +17,7 @@ The droplet shown in DigitalOcean is:
 
 ## 1. Create production environment
 
-On the droplet, create `/opt/pos/.env`. A template is included at `deploy/digitalocean/pos.env.example`.
+On the droplet, create `/opt/pos/.env`.
 
 Example:
 
@@ -80,10 +80,12 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 Then deploy or update the backend services:
 
 ```sh
+apt-get update
+apt-get install -y curl git
 curl -fsSL https://raw.githubusercontent.com/Hakley10/PosDeploy/main/deploy/digitalocean/deploy-api-file-from-source.sh | sudo sh
 ```
 
-The script clones/pulls `https://github.com/Hakley10/PosDeploy.git`, installs Docker if needed, builds `api-v4` and `file-v3`, starts `jsreport`, and puts Caddy in front for HTTPS.
+The script validates `/opt/pos/.env`, creates swap if needed, clones/pulls `https://github.com/Hakley10/PosDeploy.git`, installs Docker if needed, builds `api-v4` and `file-v3`, starts `jsreport`, and puts Caddy in front for HTTPS.
 
 ```sh
 docker compose --env-file /opt/pos/.env -f docker-compose.api-file.yml up -d --build pos_file pos_report pos_api pos_proxy
@@ -96,6 +98,13 @@ docker ps
 curl https://api.198-199-91-11.sslip.io/api
 curl https://file.198-199-91-11.sslip.io/
 curl http://127.0.0.1:8080/
+```
+
+If a service fails:
+
+```sh
+cd /opt/pos-source
+docker compose --env-file /opt/pos/.env -f docker-compose.api-file.yml logs --tail=120
 ```
 
 ## 4. Frontend settings

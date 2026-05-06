@@ -9,4 +9,9 @@ export class AppController {
     root() {
         return { title: 'CamCyber POS API' };
     }
+
+    @Get('health')
+    health() {
+        return { status: 'ok', service: 'pos_api' };
+    }
 }
