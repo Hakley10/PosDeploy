@@ -4,12 +4,12 @@ services:
     container_name: pos_proxy
     restart: unless-stopped
     env_file:
-      - .env
+      - /opt/pos/.env
     ports:
       - "${HTTP_PUBLIC_PORT:-80}:80"
       - "${HTTPS_PUBLIC_PORT:-443}:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./deploy/digitalocean/Caddyfile:/etc/caddy/Caddyfile:ro
       - pos_caddy_data:/data
       - pos_caddy_config:/config
     depends_on:
@@ -20,11 +20,13 @@ services:
       - pos
 
   pos_api:
-    image: registry.digitalocean.com/${DO_REGISTRY_NAME}/pos-api:${API_IMAGE_TAG:-latest}
+    build:
+      context: ./api-v4
+      dockerfile: Dockerfile.prod
     container_name: pos_api
     restart: unless-stopped
     env_file:
-      - .env
+      - /opt/pos/.env
     environment:
       PORT: 3000
       FILE_BASE_URL: ${FILE_BASE_URL:-http://pos_file:8080}
@@ -38,11 +40,13 @@ services:
       - pos
 
   pos_file:
-    image: registry.digitalocean.com/${DO_REGISTRY_NAME}/pos-file:${FILE_IMAGE_TAG:-latest}
+    build:
+      context: ./file-v3
+      dockerfile: Dockerfile.prod
     container_name: pos_file
     restart: unless-stopped
     env_file:
-      - .env
+      - /opt/pos/.env
     environment:
       PORT: 8080
     ports:

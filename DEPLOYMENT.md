@@ -1,18 +1,32 @@
 # POS Deployment
 
-This setup deploys:
+Frontend:
 
-- `web-v4` to Cloudflare Pages.
-- `api-v4`, `file-v3`, and `jsreport` to a DigitalOcean droplet using Docker Compose.
+- Cloudflare Pages: `https://posdeploy1.pages.dev/`
 
-## 1. DigitalOcean droplet
+Backend on the DigitalOcean droplet:
 
-Install Docker and the Compose plugin on the droplet, then create `/opt/pos/.env`.
+- API public URL: `https://api.198-199-91-11.sslip.io/api`
+- File public URL: `https://file.198-199-91-11.sslip.io/`
+- jsreport public URL: `https://report.198-199-91-11.sslip.io/`
 
-Example `/opt/pos/.env`:
+The droplet shown in DigitalOcean is:
+
+- Public IPv4: `198.199.91.11`
+- Ubuntu: `24.04 LTS`
+
+## 1. Create production environment
+
+On the droplet, create `/opt/pos/.env`. A template is included at `deploy/digitalocean/pos.env.example`.
+
+Example:
 
 ```dotenv
-DO_REGISTRY_NAME=your-docr-registry
+API_DOMAIN=api.198-199-91-11.sslip.io
+FILE_DOMAIN=file.198-199-91-11.sslip.io
+REPORT_DOMAIN=report.198-199-91-11.sslip.io
+HTTP_PUBLIC_PORT=80
+HTTPS_PUBLIC_PORT=443
 API_PUBLIC_PORT=8990
 FILE_PUBLIC_PORT=8080
 REPORT_PUBLIC_PORT=5488
@@ -49,36 +63,52 @@ SMTP_USER=
 SMTP_PASS=
 ```
 
-## 2. GitLab variables
+Use the real values from your local `api-v4/.env` and `file-v3/.env`. Do not commit production `.env` files.
 
-Add these variables to `api-v4` and `file-v3`:
+## 2. Deploy from source
 
-- `DO_ACCESS_TOKEN`
-- `DO_REGISTRY_NAME`
-- `DO_HOST`
-- `DO_SSH_USER`
-- `DO_SSH_PRIVATE_KEY`
+Because the droplet is only `512 MB`, add swap before building. Run this once in the DigitalOcean Web Console:
 
-Add these variables to `web-v4`:
+```sh
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
 
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_PAGES_PROJECT`
-- `API_BASE_URL`, for example `https://api.example.com/api`
-- `FILE_BASE_URL`, for example `https://file.example.com/`
-- `WEB_BASE_URL`, usually the public web URL
+Then deploy or update the backend services:
 
-## 3. DNS
+```sh
+curl -fsSL https://raw.githubusercontent.com/Hakley10/PosDeploy/main/deploy/digitalocean/deploy-api-file-from-source.sh | sudo sh
+```
 
-Recommended DNS:
+The script clones/pulls `https://github.com/Hakley10/PosDeploy.git`, installs Docker if needed, builds `api-v4` and `file-v3`, starts `jsreport`, and puts Caddy in front for HTTPS.
 
-- `app.example.com` -> Cloudflare Pages custom domain.
-- `api.example.com` -> DigitalOcean droplet, reverse proxy to port `8990`.
-- `file.example.com` -> DigitalOcean droplet, reverse proxy to port `8080`.
-- `report.example.com` -> DigitalOcean droplet, reverse proxy to port `5488`.
+```sh
+docker compose --env-file /opt/pos/.env -f docker-compose.api-file.yml up -d --build pos_file pos_report pos_api pos_proxy
+```
 
-Use HTTPS in front of the DigitalOcean services with Nginx, Caddy, Traefik, or a DigitalOcean Load Balancer.
+## 3. Check services
 
-## 4. Important security cleanup
+```sh
+docker ps
+curl https://api.198-199-91-11.sslip.io/api
+curl https://file.198-199-91-11.sslip.io/
+curl http://127.0.0.1:8080/
+```
+
+## 4. Frontend settings
+
+The frontend build defaults are configured for:
+
+- `API_BASE_URL=https://api.198-199-91-11.sslip.io/api`
+- `FILE_BASE_URL=https://file.198-199-91-11.sslip.io/`
+- `WEB_BASE_URL=https://posdeploy1.pages.dev/`
+- `SOCKET_URL=https://api.198-199-91-11.sslip.io`
+
+Cloudflare Pages must redeploy `web-v4` after these changes are pushed.
+
+## 5. Important security cleanup
 
 Rotate any secrets that were previously committed to the repository, especially bot tokens, report credentials, and database passwords. Keep production values only in GitLab CI/CD variables or `/opt/pos/.env`.

@@ -46,7 +46,7 @@ deploy:production:digitalocean:
     - ssh-keyscan -H "$DO_HOST" >> ~/.ssh/known_hosts
   script:
     - ssh "$DO_SSH_USER@$DO_HOST" "mkdir -p /opt/pos"
-    - scp deploy/digitalocean/docker-compose.yml deploy/digitalocean/deploy.sh "$DO_SSH_USER@$DO_HOST:/opt/pos/"
+    - scp deploy/digitalocean/docker-compose.yml deploy/digitalocean/deploy.sh deploy/digitalocean/Caddyfile "$DO_SSH_USER@$DO_HOST:/opt/pos/"
     - ssh "$DO_SSH_USER@$DO_HOST" "echo '$DO_ACCESS_TOKEN' | docker login registry.digitalocean.com -u '$DO_ACCESS_TOKEN' --password-stdin && chmod +x /opt/pos/deploy.sh && cd /opt/pos && DO_REGISTRY_NAME='$DO_REGISTRY_NAME' API_IMAGE_TAG='$CI_COMMIT_SHORT_SHA' ./deploy.sh"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'

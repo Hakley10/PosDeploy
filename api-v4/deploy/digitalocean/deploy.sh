@@ -10,6 +10,6 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-docker compose pull pos_api pos_file pos_report
-docker compose up -d pos_api pos_file pos_report
+docker compose pull pos_api pos_file pos_report pos_proxy
+docker compose up -d pos_api pos_file pos_report pos_proxy
 docker image prune -f

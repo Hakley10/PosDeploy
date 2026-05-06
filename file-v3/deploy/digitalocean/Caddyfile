@@ -1,0 +1,11 @@
+{$API_DOMAIN:api.198-199-91-11.sslip.io} {
+	reverse_proxy pos_api:3000
+}
+
+{$FILE_DOMAIN:file.198-199-91-11.sslip.io} {
+	reverse_proxy pos_file:8080
+}
+
+{$REPORT_DOMAIN:report.198-199-91-11.sslip.io} {
+	reverse_proxy pos_report:5488
+}

@@ -1,4 +1,24 @@
 services:
+  pos_proxy:
+    image: caddy:2-alpine
+    container_name: pos_proxy
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${HTTP_PUBLIC_PORT:-80}:80"
+      - "${HTTPS_PUBLIC_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - pos_caddy_data:/data
+      - pos_caddy_config:/config
+    depends_on:
+      - pos_api
+      - pos_file
+      - pos_report
+    networks:
+      - pos
+
   pos_api:
     image: registry.digitalocean.com/${DO_REGISTRY_NAME}/pos-api:${API_IMAGE_TAG:-latest}
     container_name: pos_api
@@ -53,5 +73,7 @@ networks:
     name: pos
 
 volumes:
+  pos_caddy_data:
+  pos_caddy_config:
   pos_file_uploads:
   pos_report_data:
