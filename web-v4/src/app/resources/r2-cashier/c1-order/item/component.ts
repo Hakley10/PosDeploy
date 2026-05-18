@@ -6,7 +6,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 // ================================================================>> Custom Libraries (Application-specific)
-import { env } from 'envs/env';
+import { buildFileUrl } from 'helper/shared/url';
 import { Product } from '../interface';
 
 
@@ -26,7 +26,7 @@ export class ItemComponent {
 
     @Input() data: Product;
     @Output() result = new EventEmitter<Product>;
-    public fileUrl: string = env.FILE_BASE_URL;
+    public fileUrl = buildFileUrl;
 
     // ===> Method to emit the data to the parent component
     onOutput() {

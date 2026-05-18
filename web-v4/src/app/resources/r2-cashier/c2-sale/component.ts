@@ -23,10 +23,10 @@ import FileSaver from 'file-saver';
 import { SharedDetailsComponent } from 'app/shared/dialog/component';
 import { DetailsService } from 'app/shared/dialog/service';
 import { ViewDetailSaleComponent } from 'app/shared/view/component';
-import { env } from 'envs/env';
 import { HelperConfirmationConfig, HelperConfirmationService } from 'helper/services/confirmation';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
+import { buildFileUrl } from 'helper/shared/url';
 import { FilterSaleComponent } from './filter/component';
 import { SaleService } from './service';
 import { Data, List } from './interface';
@@ -68,7 +68,7 @@ export class SaleComponent implements OnInit {
     displayedColumns: string[] = ['no', 'receipt', 'price', 'ordered_at', 'ordered_at_time', 'device', 'seller', 'action'];
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
 
-    fileUrl: string = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     total: number = 10;
     limit: number = 10;
     page: number = 1;

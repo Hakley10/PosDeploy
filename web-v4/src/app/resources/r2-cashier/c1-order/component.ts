@@ -16,9 +16,9 @@ import { Subject, takeUntil }           from 'rxjs';
 // ================================================================>> Custom Library
 import { UserService }      from 'app/core/user/service';
 import { User }             from 'app/core/user/interface';
-import { env }              from 'envs/env';
 import { SnackbarService }  from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants      from 'helper/shared/constants';
+import { buildFileUrl }     from 'helper/shared/url';
 import { ProductType }      from '../c2-sale/interface';
 import { ItemComponent }    from './item/component';
 import { OrderService }     from './service';
@@ -63,7 +63,7 @@ export class OrderComponent implements OnInit, OnDestroy {
     private _unsubscribeAll: Subject<User> = new Subject<User>();
 
     // Define the base URL for file uploads
-    fileUrl: string = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     data: Data[] = [];
     allProducts: Product[] = [];
     isLoading: boolean = false;
