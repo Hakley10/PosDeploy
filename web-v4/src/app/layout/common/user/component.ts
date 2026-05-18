@@ -8,7 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from 'app/core/auth/service';
 import { UserService } from 'app/core/user/service';
 import { User } from 'app/core/user/interface';
-import { env } from 'envs/env';
+import { buildFileUrl } from 'helper/shared/url';
 import { Subject, takeUntil } from 'rxjs';
 import { SwitchRoleComponent } from './switch-role/component';
 
@@ -29,7 +29,7 @@ import { SwitchRoleComponent } from './switch-role/component';
 export class UserComponent implements OnInit, OnDestroy {
 
     user: User;
-    fileUrl = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     staticImg: string = 'assets/images/logo/avatar.png';
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 

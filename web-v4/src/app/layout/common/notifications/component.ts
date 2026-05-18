@@ -18,7 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { Notification } from 'app/layout/common/notifications/interface';
 import { NotificationsService } from 'app/layout/common/notifications/service';
-import { env } from 'envs/env';
+import { buildFileUrl } from 'helper/shared/url';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -42,7 +42,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
     @ViewChild('notificationsPanel')
     private _notificationsPanel: TemplateRef<any>;
-    fileUrl: string = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     notifications: Notification[] = [];
     unreadCount: number = 0;
     private _overlayRef: OverlayRef;

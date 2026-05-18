@@ -83,7 +83,7 @@
                 <!-- Image -->
                 @if (notification.cashier) {
                 <img class="mr-4 h-8 w-8 shrink-0 overflow-hidden rounded-full object-cover object-center"
-                    [src]="fileUrl + notification.cashier?.avatar" [alt]="'Notification image'" />
+                    [src]="fileUrl(notification.cashier?.avatar)" [alt]="'Notification image'" />
                 }
                 <!-- Title, description & time -->
                 <div class="flex flex-auto flex-col">
