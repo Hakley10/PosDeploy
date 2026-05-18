@@ -22,11 +22,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { env } from 'envs/env';
-
 import { PortraitComponent } from 'helper/components/portrait/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
+import { buildFileUrl } from 'helper/shared/url';
 import { Subject } from 'rxjs';
 import { Data } from '../interface';
 import { ProductService } from '../service';
@@ -85,7 +84,7 @@ export class ProductsDialogComponent implements OnInit, OnDestroy {
     // ngOnInit method
     ngOnInit(): void {
         // Set the image source based on the product data (if available)
-        this.data.product != null ? this.src = `${env.FILE_BASE_URL}${this.data.product.image}` : '';
+        this.data.product != null ? this.src = buildFileUrl(this.data.product.image) : '';
         // Initialize the form builder
         this.ngBuilderForm();
     }

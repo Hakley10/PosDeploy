@@ -17,7 +17,6 @@ import { Data, List, SetupResponse } from './interface';
 })
 
 export class ProductService {
-    fileUrl: string = "http://localhost:8080" + '/';
     private _httpOptions = {
         headers: new HttpHeaders({
             'Content-type': 'application/json',

@@ -8,8 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import { env } from 'envs/env';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
+import { buildFileUrl } from 'helper/shared/url';
 import { Subject } from 'rxjs';
 
 import { Data } from './interface';
@@ -37,7 +37,7 @@ export class ViewDialogComponent implements OnInit, OnDestroy {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     displayedColumns: string[] = ['no', 'receipt', 'price', 'ordered_at', 'ordered_at_time', 'seller'];
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
-    fileUrl = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     public isLoading: boolean;
 
     constructor(

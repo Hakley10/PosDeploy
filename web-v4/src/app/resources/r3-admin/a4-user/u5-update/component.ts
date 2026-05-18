@@ -11,10 +11,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 
-import { env } from 'envs/env';
 import { PortraitComponent } from 'helper/components/portrait/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
+import { buildFileUrl } from 'helper/shared/url';
 import { RequestUserUpdate, User } from '../interface';
 import { UserService } from '../service';
 @Component({
@@ -46,7 +46,6 @@ export class UpdateUserComponent implements OnInit {
     isLoading = false;
     currentDate = new Date();
     private userService = inject(UserService);
-    fileUrl: string = env.FILE_BASE_URL;
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: { roles: { id: number; name: string }[], element: User },
         private dialogRef: MatDialogRef<UpdateUserComponent>,
@@ -65,7 +64,7 @@ export class UpdateUserComponent implements OnInit {
         });
 
         // Set initial avatar src
-        this.src = this.fileUrl + this.data.element.avatar;
+        this.src = buildFileUrl(this.data.element.avatar);
     }
 
     validateRoleIds(control: AbstractControl): ValidationErrors | null {

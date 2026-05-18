@@ -19,7 +19,7 @@ import { UiSwitchModule } from 'ngx-ui-switch';
 
 // ================================================================================>> Custom Library
 // Environment
-import { env } from 'envs/env';
+import { buildFileUrl } from 'helper/shared/url';
 
 // Local
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -67,7 +67,7 @@ export class UserComponent implements OnInit, OnDestroy {
 
     displayedColumns: string[] = ['no', 'profile', 'number', 'status', 'last_log', 'total_sale', 'total_price', 'action'];
     dataSource: MatTableDataSource<User> = new MatTableDataSource<User>([]);
-    fileUrl: string = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     link: string = undefined;
     total: number = 10;
     limit: number = 10;

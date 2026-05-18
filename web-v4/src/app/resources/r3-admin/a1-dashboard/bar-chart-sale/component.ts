@@ -1,7 +1,6 @@
 import { NgIf }             from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { MatIconModule }    from '@angular/material/icon';
-import { env }              from 'envs/env';
 import { SnackbarService }  from 'helper/services/snack-bar/snack-bar.service';
 import { ApexOptions, NgApexchartsModule } from "ng-apexcharts";
 import { DashbordService }  from '../service';
@@ -17,7 +16,6 @@ export class SaleCashierBarChartComponent implements OnInit, OnChanges {
     @ViewChild("chartContainer1", { read: ElementRef }) chartContainer!: ElementRef;
     chartOptions: Partial<ApexOptions> = {};
     @Input() dataSouce: CashierData; // Receive data source from parent
-    fileUrl = env.FILE_BASE_URL;
     constructor(
         private _cdr: ChangeDetectorRef,
         private _snackBarService: SnackbarService,

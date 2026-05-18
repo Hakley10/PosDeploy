@@ -18,9 +18,9 @@ import { RouterModule }         from '@angular/router';
 import { UserService }          from 'app/core/user/service';
 import { User }                 from 'app/core/user/interface';
 import { format }               from 'date-fns';
-import { env }                  from 'envs/env';
 import { SnackbarService }      from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants          from 'helper/shared/constants';
+import { buildFileUrl }         from 'helper/shared/url';
 import { UiSwitchModule }       from 'ngx-ui-switch';
 import { BehaviorSubject, Subject }     from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -78,7 +78,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public cashierData: CashierData;
     public productType: ProductTypeData;
     public saleData: SalesData;
-    fileUrl = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
 
     today?: string;
     yesterday?: string;

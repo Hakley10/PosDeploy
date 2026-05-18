@@ -11,10 +11,10 @@ import { MatMenuModule }                                        from '@angular/m
 import { MatTableDataSource, MatTableModule }                   from '@angular/material/table';
 
 // ================================================================>> Custom Library
-import { env }                                                  from 'envs/env';
 import { HelperConfirmationConfig, HelperConfirmationService }  from 'helper/services/confirmation';
 import { SnackbarService }                                      from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants                                          from 'helper/shared/constants';
+import { buildFileUrl }                                         from 'helper/shared/url';
 
 import { CreateDialogComponent }                                from '../create-dialog/component';
 import { UpdateDialogComponent }                                from '../update-dialog/component';
@@ -50,7 +50,7 @@ export class ProductTypeComponent implements OnInit {
     public displayedColumns                                     : string[] = ['no', 'name', 'n_of_products', 'created_at', 'action'];
     public dataSource                                           : MatTableDataSource<Item> = new MatTableDataSource<Item>([]);
 
-    public fileUrl                                              : string = env.FILE_BASE_URL; // Assuming this is the base URL for file-related operations
+    public fileUrl                                              = buildFileUrl;
     public isLoading                                            : boolean  = false;
 
     // ===>> First Fuction to call

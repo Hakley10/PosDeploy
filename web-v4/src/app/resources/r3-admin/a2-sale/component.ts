@@ -16,13 +16,11 @@ import { MatProgressSpinnerModule }             from '@angular/material/progress
 import { MatTableDataSource, MatTableModule }   from '@angular/material/table';
 
 // ================================================================================>> Custom Library
-// ===>> Env
-import { env } from 'envs/env';
-
 // ===>> Helper Library
 import { helperAnimations }             from 'helper/animations';
 import { HelperConfirmationService }    from 'helper/services/confirmation';
 import { SnackbarService }              from 'helper/services/snack-bar/snack-bar.service';
+import { buildFileUrl }                 from 'helper/shared/url';
 
 // ===>> Shared
 import { DialogConfigService }          from 'app/shared/dialog-config.service';
@@ -106,7 +104,7 @@ export class SaleComponent implements OnInit {
     public selectedCVDownloadIndex  : number    = -1;
 
     // ===>> File Url
-    public FILE_URL         : string = env.FILE_BASE_URL
+    public FILE_URL         = buildFileUrl;
 
     // ===>> Pagination
     public page                 : number = 1;

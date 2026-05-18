@@ -58,7 +58,7 @@
                     <td mat-cell *matCellDef="let item">
                         <div class="flex gap-1 items-center">
                             <img class="w-6 h-6 scale-90 object-cover dark:bg-white dark:bg-opacity-5  transition-all rounded-lg hover:border-green-300"
-                                [src]=" fileUrl+item.image " alt="invalid img">
+                                [src]="fileUrl(item.image)" alt="invalid img">
 
                             <span> {{ item?.name }} </span>
                         </div>

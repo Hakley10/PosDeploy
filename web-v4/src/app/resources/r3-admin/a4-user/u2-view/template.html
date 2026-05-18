@@ -29,7 +29,7 @@
                     <div class="w-full flex justify-between overflow-hidden">
                         <div></div>
                         <img class="border-2 w-32 h-32 border-blue-500 object-cover rounded-full -mr-10"
-                            [src]="fileUrl + element?.avatar" alt="Profile Image">
+                            [src]="fileUrl(element?.avatar)" alt="Profile Image">
                         <button mat-icon-button (click)="update(element)" class="mr-5">
                             <mat-icon class="icon-size-6" svgIcon="mdi:square-edit-outline"></mat-icon>
                         </button>
@@ -180,7 +180,7 @@
                                             <!-- Profile Image with Icon-based Status Indicator -->
                                             <div class="relative min-w-8 max-w-8 min-h-8 max-h-8">
                                                 <img class="w-full h-full object-cover rounded-full border border-blue-200"
-                                                    [src]="fileUrl + element.cashier?.avatar" alt="profile">
+                                                    [src]="fileUrl(element.cashier?.avatar)" alt="profile">
 
                                                 <!-- Status Indicator with Icon -->
                                                 <span

@@ -15,11 +15,11 @@ import { MatSelectModule }                                     from '@angular/ma
 import { MatTableDataSource, MatTableModule }                  from '@angular/material/table';
 
 // ================================================================>> Custom Library (Application-specific)
-import { env }                                                  from 'envs/env';
 import FileSaver                                                from 'file-saver';
 import { HelperConfirmationConfig, HelperConfirmationService }  from 'helper/services/confirmation';
 import { SnackbarService }                                      from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants                                          from 'helper/shared/constants';
+import { buildFileUrl }                                          from 'helper/shared/url';
 
 import { DialogConfigService }                                  from 'app/shared/dialog-config.service';
 import { ErrorHandleService }                                   from 'app/shared/error-handle.service';
@@ -79,18 +79,8 @@ export class ProductComponent implements OnInit {
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
 
 
-// Helper to build image URLs robustly
 getImageUrl(image: string): string {
-    if (!image) return '';
-    // If image is already an absolute URL
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-        return image;
-    }
-    // Remove leading slash from image if present
-    const cleanImage = image.startsWith('/') ? image.substring(1) : image;
-    // Remove trailing slash from FILE_BASE_URL if present
-    const base = env.FILE_BASE_URL.endsWith('/') ? env.FILE_BASE_URL.slice(0, -1) : env.FILE_BASE_URL;
-    return `${base}/${cleanImage}`;
+    return buildFileUrl(image);
 }
 
     public total                   :   number         = 0;

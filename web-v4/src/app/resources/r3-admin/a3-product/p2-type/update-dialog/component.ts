@@ -27,7 +27,7 @@ import { MatTooltipModule }                                 from '@angular/mater
 // Helper
 import { SnackbarService }                                  from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants                                      from 'helper/shared/constants';
-import { env }                                              from 'envs/env';
+import { buildFileUrl }                                     from 'helper/shared/url';
 
 import { ProductTypeService }                               from '../service';
 import { Item }                                             from '../interface';
@@ -83,7 +83,7 @@ export class UpdateDialogComponent implements OnInit {
     ngOnInit(): void {
 
         // Set image
-        this.defaultImageUri = env.FILE_BASE_URL + this.data.image;
+        this.defaultImageUri = buildFileUrl(this.data.image);
 
         // Initialize the form on component initialization
         this.ngBuilderForm();

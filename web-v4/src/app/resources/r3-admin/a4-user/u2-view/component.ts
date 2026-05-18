@@ -13,7 +13,7 @@ import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTabsModule } from "@angular/material/tabs";
-import { env } from 'envs/env';
+import { buildFileUrl } from 'helper/shared/url';
 import { User } from "../interface";
 import { UpdateUserComponent } from "../u5-update/component";
 import { Data } from "./interface";
@@ -41,7 +41,7 @@ import { Data } from "./interface";
 })
 export class ViewUserComponent implements OnInit {
 
-    fileUrl = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     isLoading: boolean = false
     element: any
     displayedColumns: string[] = ['no', 'receipt', 'price', 'ordered_at', 'ordered_at_time', 'seller'];
