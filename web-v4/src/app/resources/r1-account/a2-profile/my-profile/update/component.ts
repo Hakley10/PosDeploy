@@ -14,11 +14,9 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
 // ================================================================================>> Custom Library
-// Env
-import { env } from 'envs/env';
-
 // Helper
 import GlobalConstants from 'helper/shared/constants';
+import { buildFileUrl } from 'helper/shared/url';
 
 // Service
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
@@ -66,8 +64,7 @@ export class UpdateProfileDialogComponent {
     ) { }
 
     ngOnInit(): void {
-        const avatarPath = this.data.avatar.replace(/^\/+/, '');
-        this.src = `${env.FILE_BASE_URL.replace(/\/?$/, '/')}${avatarPath}`;
+        this.src = buildFileUrl(this.data.avatar);
         this.ngBuilderForm();
     }
 

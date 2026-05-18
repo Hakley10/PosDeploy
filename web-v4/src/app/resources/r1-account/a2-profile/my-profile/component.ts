@@ -16,7 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 // ================================================================================>> Custom Library
 // Env
-import { env } from 'envs/env';
+import { buildFileUrl } from 'helper/shared/url';
 
 // // Service
 // import { UserService } from 'app/core/user/user.service';
@@ -50,7 +50,7 @@ import { UserService } from 'app/core/user/service';
 export class ProfileComponent implements OnInit {
 
     public user             : User;
-    public fileUrl          : string = env.FILE_BASE_URL;
+    public fileUrl          = buildFileUrl;
     public src              : string;
     public staticImg        : string = '/images/default/avatar.jpg';
 
@@ -71,11 +71,7 @@ export class ProfileComponent implements OnInit {
             // Data Maping
             this.user = user;
 
-            // Check if the avatar is a valid image
-            const validImgExtensions = /\.(jpg|jpeg|png|gif|bmp|webp)$/i;
-            this.src = this.user.avatar && validImgExtensions.test(this.user.avatar)
-                ? this.staticImg
-                : `${this.fileUrl}/${this.user.avatar}`;
+            this.src = this.user.avatar ? buildFileUrl(this.user.avatar) : this.staticImg;
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
