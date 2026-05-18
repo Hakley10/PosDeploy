@@ -10,10 +10,10 @@ import { MatMenuModule }        from '@angular/material/menu';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule }        from '@angular/material/tabs';
 import { SaleService }          from 'app/resources/r2-cashier/c2-sale/service';
-import { env }                  from 'envs/env';
 import FileSaver                from 'file-saver';
 import { SnackbarService }      from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants          from 'helper/shared/constants';
+import { buildFileUrl }         from 'helper/shared/url';
 import { Subject }              from 'rxjs';
 import { DetailsService }       from '../dialog/service';
 @Component({
@@ -37,7 +37,7 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
     // Component properties
     displayedColumns: string[] = ['number', 'name', 'unit_price', 'qty', 'total'];
     dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
-    fileUrl = env.FILE_BASE_URL;
+    fileUrl = buildFileUrl;
     public isLoading: boolean;
 
     constructor(
