@@ -112,12 +112,49 @@ docker compose --env-file /opt/pos/.env -f docker-compose.api-file.yml logs --ta
 The frontend build defaults are configured for:
 
 - `API_BASE_URL=https://api.198-199-91-11.sslip.io/api`
-- `FILE_BASE_URL=https://file.198-199-91-11.sslip.io/`
+- `FILE_BASE_URL=https://file.198-199-91-11.sslip.io`
 - `WEB_BASE_URL=https://posdeploy1.pages.dev/`
 - `SOCKET_URL=https://api.198-199-91-11.sslip.io`
 
-Cloudflare Pages must redeploy `web-v4` after these changes are pushed.
+Cloudflare Pages settings:
 
-## 5. Important security cleanup
+- Root directory: `web-v4`
+- Build command: `npm ci && npm run build`
+- Build output directory: `dist`
+- Node version: `20`
+
+Set these Cloudflare Pages environment variables for both Production and Preview:
+
+```dotenv
+API_BASE_URL=https://api.198-199-91-11.sslip.io/api
+FILE_BASE_URL=https://file.198-199-91-11.sslip.io
+WEB_BASE_URL=https://posdeploy1.pages.dev/
+SOCKET_URL=https://api.198-199-91-11.sslip.io
+```
+
+The frontend includes:
+
+- `public/_redirects` for Angular route fallback to `index.html`
+- `public/_headers` to avoid stale service-worker files
+- Docker nginx SPA fallback in `web-v4/nginx.conf` if you deploy the frontend as a container instead of Cloudflare Pages
+
+Cloudflare Pages must redeploy `web-v4` after these changes are pushed. If the old app still calls `localhost`, clear the browser site data or unregister the service worker once, then reload.
+
+## 5. Optional frontend Docker deployment
+
+Cloudflare Pages is the current frontend target. If you need a Docker image instead:
+
+```sh
+cd web-v4
+docker build \
+  --build-arg API_BASE_URL=https://api.198-199-91-11.sslip.io/api \
+  --build-arg FILE_BASE_URL=https://file.198-199-91-11.sslip.io \
+  --build-arg WEB_BASE_URL=https://posdeploy1.pages.dev/ \
+  --build-arg SOCKET_URL=https://api.198-199-91-11.sslip.io \
+  -t pos-web .
+docker run -p 8081:80 pos-web
+```
+
+## 6. Important security cleanup
 
 Rotate any secrets that were previously committed to the repository, especially bot tokens, report credentials, and database passwords. Keep production values only in GitLab CI/CD variables or `/opt/pos/.env`.

@@ -1,28 +1,28 @@
 # Stage 1
-FROM node:18-alpine as node
+FROM node:20-alpine AS build
 
-# Get Variables
 ARG API_BASE_URL
 ARG FILE_BASE_URL
+ARG WEB_BASE_URL
 ARG SOCKET_URL
 
-WORKDIR /usr/app
-RUN npm uninstall ws
-COPY ./package.json /usr/app/package.json
-COPY ./package-lock.json /usr/app/package-lock.json
-
-# Install Dependencies
-RUN npm install --legacy-peer-deps
-
-COPY ./ /usr/app
-
-# Increase Node heap memory limit before build
+ENV API_BASE_URL=${API_BASE_URL}
+ENV FILE_BASE_URL=${FILE_BASE_URL}
+ENV WEB_BASE_URL=${WEB_BASE_URL}
+ENV SOCKET_URL=${SOCKET_URL}
 ENV NODE_OPTIONS=--max_old_space_size=2048
 
-# Build
-RUN npm run build --prod
+WORKDIR /usr/app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
 
 # Stage 2
-FROM nginx:1.15.8-alpine
+FROM nginx:1.27-alpine
 
-COPY --from=node /usr/app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /usr/app/dist /usr/share/nginx/html

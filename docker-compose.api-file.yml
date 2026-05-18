@@ -36,6 +36,12 @@ services:
     depends_on:
       - pos_file
       - pos_report
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - pos
 
@@ -53,6 +59,12 @@ services:
       - "${FILE_PUBLIC_PORT:-8080}:8080"
     volumes:
       - pos_file_uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - pos
 

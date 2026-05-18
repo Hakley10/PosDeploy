@@ -200,6 +200,17 @@ export class DashboardService {
                 previousPeriodFilter = {
                     ordered_at: { [Op.gte]: startOfLastMonth, [Op.lte]: endOfLastMonth },
                 };
+            } else {
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+
+                currentPeriodFilter = {
+                    where: where(fn('DATE', col('ordered_at')), Op.eq, formatDate(today)),
+                };
+                previousPeriodFilter = {
+                    where: where(fn('DATE', col('ordered_at')), Op.eq, formatDate(yesterday)),
+                };
             }
 
             const totalSaleCurrent = await Order.sum('total_price', currentPeriodFilter) ?? 0;
@@ -273,47 +284,11 @@ export class DashboardService {
 
     async findCashierAndTotalSale(filters: { today?: string; yesterday?: string; thisWeek?: string; thisMonth?: string } = {}) {
         try {
-            const { currentPeriodFilter, previousPeriodFilter } = this.getDateFilters(filters);
-
             const cashiers = await User.findAll({
                 attributes: [
                     'id',
                     'name',
                     'avatar',
-
-                    // Total sales for the current period
-                    [Sequelize.literal(`(
-                        SELECT COALESCE(SUM(o.total_price), 0)
-                        FROM "order" AS o
-                        WHERE o.cashier_id = "User".id
-                        AND ${currentPeriodFilter}
-                    )`), 'totalAmount'],
-
-                    // Percentage change between today and yesterday (or current and previous period)
-                    [Sequelize.literal(`(
-                        SELECT CASE
-                            WHEN COALESCE(yesterdaySales.total, 0) = 0 AND COALESCE(todaySales.total, 0) > 0 THEN 100.00
-                            WHEN COALESCE(todaySales.total, 0) = 0 THEN 0.00
-                            ELSE TRUNC(
-                                CAST(
-                                    ((COALESCE(todaySales.total, 0) - COALESCE(yesterdaySales.total, 0)) 
-                                    / GREATEST(yesterdaySales.total, 1)) * 100 
-                                AS NUMERIC), 2
-                            )
-                        END AS percentageChange
-                        FROM (
-                            SELECT SUM(o.total_price) AS total
-                            FROM "order" AS o
-                            WHERE o.cashier_id = "User".id
-                            AND ${currentPeriodFilter}
-                        ) AS todaySales,
-                        (
-                            SELECT SUM(o.total_price) AS total
-                            FROM "order" AS o
-                            WHERE o.cashier_id = "User".id
-                            AND ${previousPeriodFilter}
-                        ) AS yesterdaySales
-                    )`), 'percentageChange'],
                 ],
                 include: [
                     {
@@ -323,13 +298,103 @@ export class DashboardService {
                         include: [{ model: Role, attributes: ['id', 'name'] }],
                     },
                 ],
-                order: [[Sequelize.literal('"totalAmount"'), 'DESC']],
             });
 
-            return { data: cashiers };
+            const { currentPeriodWhere, previousPeriodWhere } = this.getOrderDateWhereFilters(filters);
+
+            const data = await Promise.all(cashiers.map(async cashier => {
+                const currentTotal = Number(await Order.sum('total_price', {
+                    where: {
+                        cashier_id: cashier.id,
+                        ...currentPeriodWhere,
+                    },
+                }) ?? 0);
+
+                const previousTotal = Number(await Order.sum('total_price', {
+                    where: {
+                        cashier_id: cashier.id,
+                        ...previousPeriodWhere,
+                    },
+                }) ?? 0);
+
+                let percentageChange = 0;
+                if (previousTotal === 0 && currentTotal > 0) {
+                    percentageChange = 100;
+                } else if (previousTotal > 0) {
+                    percentageChange = Number((((currentTotal - previousTotal) / previousTotal) * 100).toFixed(2));
+                }
+
+                return {
+                    ...cashier.toJSON(),
+                    totalAmount: currentTotal,
+                    percentageChange,
+                };
+            }));
+
+            data.sort((a, b) => b.totalAmount - a.totalAmount);
+
+            return { data };
         } catch (err) {
             throw new BadRequestException(err.message);
         }
+    }
+
+    private getOrderDateWhereFilters(filters: { today?: string; yesterday?: string; thisWeek?: string; thisMonth?: string }) {
+        const dayRange = (date: Date) => {
+            const start = new Date(date);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(date);
+            end.setHours(23, 59, 59, 999);
+
+            return { start, end };
+        };
+
+        let currentStart: Date;
+        let currentEnd: Date;
+        let previousStart: Date;
+        let previousEnd: Date;
+
+        if (filters.yesterday) {
+            const yesterday = new Date(filters.yesterday);
+            const dayBeforeYesterday = new Date(yesterday);
+            dayBeforeYesterday.setDate(yesterday.getDate() - 1);
+
+            ({ start: currentStart, end: currentEnd } = dayRange(yesterday));
+            ({ start: previousStart, end: previousEnd } = dayRange(dayBeforeYesterday));
+        } else if (filters.thisWeek) {
+            currentStart = this.startOfWeek(new Date());
+            currentEnd = this.endOfDay(new Date());
+
+            previousStart = this.startOfWeek(new Date(currentStart));
+            previousStart.setDate(previousStart.getDate() - 7);
+            previousEnd = new Date(currentStart);
+            previousEnd.setMilliseconds(previousEnd.getMilliseconds() - 1);
+        } else if (filters.thisMonth) {
+            currentStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            currentEnd = this.endOfDay(new Date());
+
+            previousStart = new Date(currentStart);
+            previousStart.setMonth(previousStart.getMonth() - 1);
+            previousEnd = new Date(currentStart);
+            previousEnd.setMilliseconds(previousEnd.getMilliseconds() - 1);
+        } else {
+            const today = filters.today ? new Date(filters.today) : new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            ({ start: currentStart, end: currentEnd } = dayRange(today));
+            ({ start: previousStart, end: previousEnd } = dayRange(yesterday));
+        }
+
+        return {
+            currentPeriodWhere: {
+                ordered_at: { [Op.between]: [currentStart, currentEnd] },
+            },
+            previousPeriodWhere: {
+                ordered_at: { [Op.between]: [previousStart, previousEnd] },
+            },
+        };
     }
 
     private getDateFilters(filters: { today?: string; yesterday?: string; thisWeek?: string; thisMonth?: string }) {
@@ -343,15 +408,15 @@ export class DashboardService {
             const dayBeforeYesterday = new Date(yesterday);
             dayBeforeYesterday.setDate(yesterday.getDate() - 1);
 
-            currentPeriodFilter = `o.ordered_at::date = '${formatDate(yesterday)}'`;
-            previousPeriodFilter = `o.ordered_at::date = '${formatDate(dayBeforeYesterday)}'`;
+            currentPeriodFilter = `DATE(o.ordered_at) = '${formatDate(yesterday)}'`;
+            previousPeriodFilter = `DATE(o.ordered_at) = '${formatDate(dayBeforeYesterday)}'`;
         } else if (filters.today) {
             const today = new Date();
             const yesterday = new Date(today);
             yesterday.setDate(today.getDate() - 1);
 
-            currentPeriodFilter = `o.ordered_at::date = '${formatDate(today)}'`;
-            previousPeriodFilter = `o.ordered_at::date = '${formatDate(yesterday)}'`;
+            currentPeriodFilter = `DATE(o.ordered_at) = '${formatDate(today)}'`;
+            previousPeriodFilter = `DATE(o.ordered_at) = '${formatDate(yesterday)}'`;
         } else if (filters.thisWeek) {
             const startOfThisWeek = this.startOfWeek(new Date());
             const startOfLastWeek = this.startOfWeek(new Date(startOfThisWeek));
@@ -375,8 +440,8 @@ export class DashboardService {
             const yesterday = new Date(today);
             yesterday.setDate(today.getDate() - 1);
 
-            currentPeriodFilter = `o.ordered_at::date = '${formatDate(today)}'`;
-            previousPeriodFilter = `o.ordered_at::date = '${formatDate(yesterday)}'`;
+            currentPeriodFilter = `DATE(o.ordered_at) = '${formatDate(today)}'`;
+            previousPeriodFilter = `DATE(o.ordered_at) = '${formatDate(yesterday)}'`;
         }
 
         return { currentPeriodFilter, previousPeriodFilter };
@@ -397,7 +462,7 @@ export class DashboardService {
                     [Sequelize.literal(`(
                         SELECT COUNT(*)
                         FROM product AS p
-                        WHERE p.type_id = "ProductType".id
+                        WHERE p.type_id = \`ProductType\`.\`id\`
                         ${dateCondition}
                     )`), 'productCount'],
                 ],

@@ -1,6 +1,7 @@
 import { expandCollapse } from 'helper/animations/expand-collapse';
 import {
     fadeIn,
+    fadeInCustom,
     fadeInBottom,
     fadeInLeft,
     fadeInRight,
@@ -27,6 +28,7 @@ import { zoomIn, zoomOut } from 'helper/animations/zoom';
 export const helperAnimations = [
     expandCollapse,
     fadeIn,
+    fadeInCustom,
     fadeInTop,
     fadeInBottom,
     fadeInLeft,

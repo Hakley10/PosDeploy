@@ -1,0 +1,13 @@
+/ngsw-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/ngsw.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/index.html
+  Cache-Control: no-cache
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
